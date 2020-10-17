@@ -38,6 +38,14 @@ if __name__ == '__main__':
     show_birth_year()
     print()
 
+    # break and continue
+    for i in range(5):
+        if i == 3:
+            # continue
+            break
+        print(i)
+    print()
+
     # Printing docstrings
     print(__name__)
     print(__file__)
@@ -49,3 +57,9 @@ if __name__ == '__main__':
     for i, v in list(enumerate(theBeatles)):
         print(str(i) + ':', v)
 
+    # Importing from Standard Library
+    from datetime import date
+    date_of_birth = date(1940, 10, 9)
+    print(date_of_birth)
+    preferred_date_format = '%b %d, %Y'
+    print(date_of_birth.strftime(preferred_date_format))

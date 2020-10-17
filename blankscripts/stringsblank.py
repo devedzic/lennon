@@ -3,6 +3,8 @@
 
 import string
 
+import settings
+
 
 def demonstrate_formatting():
     """Using classical formatting.
@@ -18,6 +20,12 @@ def demonstrate_formatting():
 def demonstrate_fancy_formatting():
     """Using "fancy" formatting.
     - format strings like '{0}{1} {2}', '{0}{1} {2}, {3}', etc.
+    """
+
+
+def demonstrate_fancy_formatting_with_f_strings():
+    """Using f-strings in formatting.
+    - format strings like f'Some text {some var}, more text {another var}...', etc.
     """
 
 
