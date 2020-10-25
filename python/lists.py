@@ -169,7 +169,18 @@ def demonstrate_list_comprehension():
     print(', '.join(s for s in john))
     print(', '.join(john))
     print()
+
     songs = ['Imagine a Man', 'There\'s a Place', 'No Expectations', 'Heaven Is A Place On Earth']
+
+    # # Make the list of first words from all these titles - classic for loop
+    # fw = []
+    # for t in songs:
+    #     tw = t.split()
+    #     fw.append(tw[0])
+    # print(' '.join(fw))
+    # print()
+
+    # Make the list of first words from all these titles - list comprehension
     first_words = [words[0] for words in [title.split() for title in songs]]
     first_words_lower = [str(word).lower() for word in first_words[1:]]
     # print(first_words_lower)

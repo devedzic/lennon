@@ -37,4 +37,7 @@ def demonstrate_string_operations():
 
 if __name__ == '__main__':
 
-    pass
+    demonstrate_formatting()
+    demonstrate_fancy_formatting()
+    demonstrate_fancy_formatting_with_f_strings()
+    demonstrate_string_operations()

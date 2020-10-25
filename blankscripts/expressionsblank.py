@@ -31,5 +31,7 @@ def demonstrate_logical_operators():
 
 if __name__ == '__main__':
 
-    pass
+    demonstrate_arithmetic_operators()
+    demonstrate_relational_operators()
+    demonstrate_logical_operators()
 

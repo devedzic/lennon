@@ -27,5 +27,7 @@ def demonstrate_packing():
 
 
 if __name__ == '__main__':
-    pass
 
+    demonstrate_tuples()
+    demonstrate_zip()
+    demonstrate_packing()

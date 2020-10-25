@@ -20,8 +20,23 @@ def demonstrate_loops():
     - while loop
     """
 
+    for i in range(1, 21, 2):
+        print(i, end='  ')
+    print()
+    print()
+
+    l = [i for i in range(1, 21, 2)]
+    for i in l[0:4]:
+        print(i, end='  ')
+    print()
+    print()
+
+    for _ in range(1, 21, 2):
+        print('JL', end='  ')
+    print()
+    print()
+
 
 if __name__ == '__main__':
-
     demonstrate_branching()
     demonstrate_loops()

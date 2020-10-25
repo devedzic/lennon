@@ -19,5 +19,5 @@ def demonstrate_sets():
 
 if __name__ == '__main__':
 
-    pass
+    demonstrate_sets()
 

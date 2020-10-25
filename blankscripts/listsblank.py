@@ -58,6 +58,8 @@ def demonstrate_list_comprehension():
     Using str() and join() in printing results.
     """
 
+    # songs = ['Imagine a Man', 'There\'s a Place', 'No Expectations', 'Heaven is a Place on Earth']
+
 
 if __name__ == '__main__':
 

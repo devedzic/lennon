@@ -1,4 +1,4 @@
-"""Project configuration settings (PROJECT_DIR etc.)
+"""Project configuration settings (PROJECT_DIR, format strings, etc.)
 """
 
 
