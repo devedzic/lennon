@@ -6,34 +6,56 @@ user-defined decorators
 
 import functools
 
+import python.functions
+
 
 def pass_simple_function_as_parameter():
     """Demonstrates using another function as a parameter. It works because functions are objects.
     If a call to f includes positional arguments, then they are part of the *args argument of this function.
-    The same holds for optional *args in the call to f.
+    The same holds for optional *args in the call to f, as well as for the default arguments of f (if any).
     """
 
     # Try something like this in Python Console:
-    #     p = *[1,2,3]        # generates an error;
-    #                           asterisk * isn't simply unary operator,
-    #                           it's argument-unpacking operator for functions definitions and functions calls;
-    #                           heuristics: use it "inside of something else", like inside of (), [] and constructors
-    #     p = *[1,2,3],       # generates a tuple, because of the comma (* is actually "inside of creating a tuple")
+    #     p = *[1,2,3]        # generates an error
+    #     p = *[1,2,3],       # generates a tuple
     #     p = 44, *[1,2,3]    # generates another tuple
     #     print(p)
     #     print(*p)
 
-    # Case 1: 0 or more arguments
+    # # Case 1: 0 or more arguments
+    # def f(*args):
+    #     print(args)           # result: a tuple of args
+    #     print(*args)          # result: a sequence of args, 'untupled'
+    #     return sum(*args)     # it must be sum(*args), not sum(args), since sum() takes one positional arg (see below)
+    #
+    # def g(h, *args):
+    #     return h(*args)       # heuristics: *args in a f. signature => use *args in the f. body as well ('untupled')
+    #
+    # print(g(f, (1, 2, 3)))    # result: 6     (sum(*args) above 'untuples' args = ((1, 2, 3),) into *args = (1, 2, 3)
+    # print(g(f, [1, 2, 3]))    # result: 6
 
-    # Try also this in Python Console:
-    #     def f(*args):
-    #         return sum(*args)     # it must be sum(*args), not sum(args), although in Python Console sum((1, 2)) is OK
-    #     def g(f, *args):
-    #         return f(*args)       # heuristics: if *args is in a f. signature, use *args in the f. body as well
-    #     g(f, (1, 2, 3))           # result: 6
-    #     g(f, [1, 2, 3])           # result: 6
+    # def f(*args):
+    #     print(args)             # result: a tuple of args
+    #     print(*args)            # result: a sequence of args, 'untupled'
+    #
+    # def g(h, *args):
+    #     return h(*args)         # heuristics: *args in a f. signature => use *args in the f. body as well ('untupled')
+    #
+    # g(f, 'John', 'Lennon', 8)
+    # g(f)
 
     # Case 2: 1 or more arguments (the first one is positional)
+    def f(x, *args):
+        print(x)
+        print(args)             # result: a tuple of args
+        print(*args)            # result: a sequence of args, 'untupled'
+
+    def g(h, *args):
+        return h(*args)         # heuristics: *args in a f. signature => use *args in the f. body as well ('untupled')
+
+    g(f, 'John', 'Lennon', 8)
+    print()
+    g(f, 'John')
 
 
 def pass_function_as_parameter(f, *args, **kwargs):
@@ -66,6 +88,8 @@ def pass_function_as_parameter(f, *args, **kwargs):
     See https://stackoverflow.com/a/34206138/1899061 for further details.
     """
 
+    f(*args, **kwargs)
+
 
 def return_function(full_name, first_name_flag):
     """Demonstrates using a function as the return value from another function.
@@ -73,6 +97,19 @@ def return_function(full_name, first_name_flag):
     - a function that returns a person's first name
     - a function that returns a person's family name
     """
+
+    name = full_name.split()
+
+    def first_name():
+        return name[0]
+
+    def family_name():
+        return name[1]
+
+    if first_name_flag:
+        return first_name
+    else:
+        return family_name
 
 
 def return_function_with_args(*args):
@@ -82,6 +119,21 @@ def return_function_with_args(*args):
     - a function that returns an empty list
     - a function that returns a tuple of args (or a list or args, or...)
     """
+
+    def return_empty_list(*parameters):
+        return []
+
+    # def return_tuple_of_args():
+    #     return args
+
+    def return_tuple_of_args(*parameters):
+        # return list(parameters)
+        return parameters
+
+    if args:
+        return return_tuple_of_args
+    else:
+        return return_empty_list
 
 
 def a_very_simple_decorator(f):
@@ -131,6 +183,12 @@ def a_very_simple_decorator(f):
     # John Lennon
     # John Lennon
 
+    def g(*p):
+        print('The Beatles')
+        return f(*p)
+
+    return g
+
 
 def members(f_to_decorate):
     """Demonstrates how to develop a decorator.
@@ -146,6 +204,16 @@ def members(f_to_decorate):
         return wrapper_decorator
     """
 
+    @functools.wraps(f_to_decorate)
+    def members_decorator(*args, **kwargs):
+        print('Band name: ', end='')
+        value = f_to_decorate(*args, **kwargs)
+        print('Members:', f'{", ".join([member for member in args[1:]])}' if len(args) > 1 else "unknown")
+        print(f'{"; ".join([str(k) + ": " + str(v) for k, v in kwargs.items()])}\n' if kwargs else '')
+        return value
+
+    return members_decorator
+
 
 @members
 def print_band(name, *members, **years_active):
@@ -154,21 +222,54 @@ def print_band(name, *members, **years_active):
     omit it if decorating manually.
     """
 
-    print(name)
+    print(f'{name}')
 
 
 if __name__ == '__main__':
 
-    pass_simple_function_as_parameter()
+    john = 'John Lennon'
+    paul = 'Paul McCartney'
+    george = 'George Harrison'
+    ringo = 'Ringo Starr'
+    the_beatles = [john, paul, george, ringo]
 
-    # from python.functions import *
+    # pass_simple_function_as_parameter()
+    # pass_function_as_parameter(python.functions.use_all_categories_of_args, 'The Beatles', *the_beatles,
+    #                            start=1962, end=1970)
+    # print(return_function('John Lennon', True)())
+
+    # print(return_function_with_args()())
+    # print(return_function_with_args(1)('John Lennon', True))
+    # print(return_function_with_args(1)())
+
+    # def something(*args):
+    #     return args
     #
-    # john = 'John Lennon'
-    # paul = 'Paul McCartney'
-    # george = 'George Harrison'
-    # ringo = 'Ringo Starr'
-    # the_beatles = [john, paul, george, ringo]
+    # a_very_simple_decorator(something)()
+    # a_very_simple_decorator(something)('John Lennon')
+    # print()
+    # print(a_very_simple_decorator(something)(john))
+    # print()
+    # print(a_very_simple_decorator(something)(*the_beatles))
+
+    # def something(*args):
+    #     return args
     #
-    # pass_function_as_parameter(use_all_categories_of_args, 'The Beatles', *the_beatles, start=1962, end=1970)
+    # something = a_very_simple_decorator(something)
+    # something(*the_beatles)
+    # print()
+    # print(something(*the_beatles))
+
+    # @a_very_simple_decorator
+    # def something(*args):
+    #     # return args
+    #     print(args)
+    #
+    # # print(something(*the_beatles))
+    # something(*the_beatles)
+
+    print_band('The Beatles', *the_beatles, Start=1962, End=1970)
+    print_band('The Beatles')
+    print(print_band.__name__)
 
 

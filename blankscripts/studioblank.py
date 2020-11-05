@@ -1,43 +1,46 @@
-"""The class representing the concept of a festival.
+"""The class representing the concept of a music/recording studio.
 """
 
 from datetime import date
 import sys
 
-from woodstock.music.performer import *
-from woodstock.music.lineup import *
-from woodstock.util.utility import *
+# from music.musician import *
+# from music.band import *
+# from util.utility import *
+import json
 
 
-class Festival:
-    """The class describing the concept of a festival.
-    It includes a name, a list of Lineup objects (lineups by date), location and the start and end dates.
+class Studio:
+    """The class describing the concept of a music/recording studio.
+    It includes a name, a list of Band objects (bands recording in that studio over a certain period of time),
+    location and the start and end dates for scheduled recording sessions.
     """
 
 
-class FestivalError(Exception):
+class StudioError(Exception):
     """Base class for exceptions in this module.
     """
 
     pass
 
 
-class FestivalStartDateException(FestivalError):
-    """Exception raised when a the tart date of a festival lineup is not between start and end dates of the festival.
+class RecordingDateException(StudioError):
+    """Exception raised when the start date of the recording sessions is not before the end date.
     """
 
 
-def check_lineup_date(lineup, start_date, end_date):
-    """Checks if lineup.date is between start_date and end_date."""
+def check_band_start_date(band, start_date, end_date):
+    """Checks if the date when the band started performing together is between start_date and end_date."""
 
 
-class LineupDateException(FestivalError):
-    """Exception raised when a the date of a festival lineup is not between start and end dates of the festival.
+class BandStartDateException(StudioError):
+    """Exception raised when a the date when a band started performing together is not between the start and end dates
+    of the recording sessions.
     """
 
 
-class FestivalEncoder(json.JSONEncoder):
-    """JSON encoder for Festival objects.
+class StudioEncoder(json.JSONEncoder):
+    """JSON encoder for Studio objects.
     """
 
     def default(self, o):
@@ -46,30 +49,15 @@ class FestivalEncoder(json.JSONEncoder):
         pass
 
 
-def festival_json_to_py(festival_json):
-    """JSON decoder for Festival objects (object_hook parameter in json.loads()).
+def studio_json_to_py(studio_json):
+    """JSON decoder for Studio objects (object_hook parameter in json.loads()).
     """
 
 
 if __name__ == "__main__":
 
-    pass
+    # from testdata.musicians import *
 
-    # # Data
-    #
-    # # Some of the Woodstock performers, Aug 15-16, 1969
-    # melanie = Performer('Melanie', is_band=False)
-    # arloGuthrie = Performer('Arlo Guthrie', is_band=False)
-    # # Some of the Woodstock performers, Aug 16-17, 1969
-    # gratefulDead = Performer('Grateful Dead', is_band=True)
-    # jeffersonAirplane = Performer('Jefferson Airplane', is_band=True)
-    # theWho = Performer('The Who', is_band=True)
-    # ccr = Performer('Creedence Clearwater Revival', is_band=True)
-    # # Some of the Woodstock performers, Aug 17-18, 1969
-    # csny = Performer('Crosby, Stills, Nash and Young', is_band=True)
-    # jimiHendrix = Performer('Jimi Hendrix', is_band=False)
-    # theBand = Performer('The Band', is_band=True)
-    #
     # day1_performers = [melanie, arloGuthrie]
     # day1_lineup = Lineup(*day1_performers, date=date(1969, 8, 15))
     # day2_performers = [gratefulDead, jeffersonAirplane, theWho, ccr]
