@@ -2,7 +2,7 @@
 """
 
 # from util import utility
-# from music.enums import Vocals, Instrument
+from music.enums import Vocals, Instrument
 import json
 
 
@@ -48,10 +48,15 @@ class Musician:
         return f'{self.name}, {band_member_str}'
 
     def __eq__(self, other):
-        return True if isinstance(other, Musician) and \
-                       other.name == self.name and \
-                       other.is_band_member == self.is_band_member \
-                    else False
+        # return True if isinstance(other, Musician) and \
+        #                other.name == self.name and \
+        #                other.is_band_member == self.is_band_member \
+        #             else False
+        # return isinstance(other, Musician) and other.name == self.name and other.is_band_member == self.is_band_member
+        isi = isinstance(other, Musician)
+        n = other.name == self.name
+        b = other.is_band_member == self.is_band_member
+        return isi and n and b
 
     def play(self, song_title, *args, **kwargs):
         """Assumes that song_title, *args (expressions of gratitude) and kwargs.values() (messages) are strings.
@@ -61,7 +66,7 @@ class Musician:
 
         rhythm_count = kwargs['rhythm_count'] if 'rhythm_count' in kwargs.keys() else ''
         messages = ' '.join([v for k, v in kwargs.items() if not k == 'rhythm_count']) if kwargs else ''
-        return f'{self.name} playing: {rhythm_count}! - {song_title} - {" ".join(arg for arg in args)} {messages}'
+        return f'{self.name} playing: {rhythm_count}! - {song_title} - {" ".join(arg for arg in args)}{messages}'
 
     def play_song(self, song_title, *args, **kwargs):
         """Demonstrates calling another method from the same class (self.<method>(...) as a mandatory syntax).
@@ -101,9 +106,23 @@ class Singer(Musician):
     with the addition of whether they are a lead or a background singer.
     """
 
-    # Version 1 - no multiple inheritance
+    # # Version 1 - no multiple inheritance
+    # def __init__(self, name, vocals, is_band_member=True):
+    #     super().__init__(name, is_band_member)
+    #     self.vocals = vocals if isinstance(vocals, Vocals) else None
 
     # Version 2 - with multiple inheritance
+    def __init__(self, vocals, **kwargs):
+        super().__init__(**kwargs)
+        self.vocals = vocals if isinstance(vocals, Vocals) else None
+
+    def __str__(self):
+        return super().__str__() + f'; {str(self.vocals.name).lower().replace("_", " ")}'
+
+    def __eq__(self, other):
+        # return super().__eq__(other) and self.vocals == other.vocals if isinstance(other, Singer) else False
+        # return super().__eq__(other) and (self.vocals == other.vocals) if isinstance(other, Singer) else False
+        return isinstance(other, Singer) and super().__eq__(other) and (self.vocals == other.vocals)
 
     def play(self, song_title, *args, **kwargs):
         """Overrides the play() method from superclass.
@@ -112,6 +131,8 @@ class Singer(Musician):
             <singer>.play(song_title, *['Thank you!', 'You're wonderful!], love='We love you!')
         """
 
+        return super().play(song_title, *args, **kwargs) + '\n' + 'Yeah!'
+
 
 class Songwriter(Musician):
     """The class describing the concept of songwriter.
@@ -119,13 +140,31 @@ class Songwriter(Musician):
     who writes songs and plays an instrument.
     """
 
-    # Version 1 - no multiple inheritance
+    # # Version 1 - no multiple inheritance
+    # def __init__(self, name, instrument, is_band_member=True):
+    #     super().__init__(name, is_band_member)
+    #     self.instrument = instrument if isinstance(instrument, Instrument) else None
+    #     self.writes_songs = True
 
     # Version 2 - with multiple inheritance
+    def __init__(self, instrument, **kwargs):
+        super().__init__(**kwargs)
+        self.instrument = instrument if isinstance(instrument, Instrument) else None
+
+    def __str__(self):
+        return super().__str__() + '; ' + self.instrument.name.lower().replace('_', ' ')
+
+    def __eq__(self, other):
+        return isinstance(other, Songwriter) and super().__eq__(other) and self.instrument == other.instrument
 
     def what_do_you_do(self):
         """Just a simple method to describe the concept of songwriter.
         """
+
+        name = f'I am {self.name}'
+        songwriter = f', a songwriter' if self.writes_songs else ''
+        instrument = f'; I also play {self.instrument}.' if self.instrument else '.'
+        print(name + songwriter + instrument)
 
 
 class SingerSongwriter(Singer, Songwriter):
@@ -133,69 +172,35 @@ class SingerSongwriter(Singer, Songwriter):
     It is assumed that a singer-songwriter is sufficiently described as a Singer who is simultaneously a Songwriter.
     """
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def __str__(self):
+        return super().__str__() + f'; {str(self.instrument.name).lower().replace("_", " ")}'
+
 
 if __name__ == "__main__":
 
-    from testdata.musicians import *
+    # from testdata.musicians import *
 
-    # johnLennon = Musician('John Lennon', is_band_member=True)
+    johnLennon = Musician('John Lennon', is_band_member=True)
+
+    # Print objects
+    print(johnLennon)
+    print()
+
+    # Compare objects
+    johnL = Musician('John Lennon', is_band_member=False)
+    print(johnLennon == johnL)
+    print()
+
+    # Access data fields (instance variables), including 'private' fields
     print(johnLennon.name)
     print(johnLennon.complete_info)
     # print(johnLennon._n)              # works, with a "warning" (Access to a protected member _n of a class)
     # print(johnLennon._Musician_n)     # doesn't work
     # print(johnLennon.__n)             # doesn't work, __n is "private"
     # print(johnLennon._Musician__n)    # works, with a "warning" (Access to a protected member _Musician__n of a class)
-    print(johnLennon)
-    print()
-
-    johnL = Musician('John Lennon', is_band_member=False)
-    print(johnLennon == johnL)
-    print()
-
-    print(johnLennon.play('I Saw Her Standing There', 'Thank you!',
-                          rhythm_count='One, two, three, four',
-                          end='Good night!'))
-    print(johnLennon.play_song('I Saw Her Standing There', 'Thank you!',
-                               rhythm_count='One, two, three, four',
-                               end='Good night!'))
-    print()
-
-    j = str(johnLennon)
-    print(j)
-    print(johnLennon.from_str(j))
-    print(Musician.from_str(j))
-
-    # # Data
-    #
-    # # The Beatles
-    # johnLennon = Musician('John Lennon', is_band_member=True)
-    # paulMcCartney = Musician('Paul McCartney', is_band_member=True)
-    # georgeHarrison = Musician('George Harrison', is_band_member=True)
-    # ringoStarr = Musician('Ringo Starr', is_band_member=True)
-    # # The Rolling Stones
-    # mickJagger = Musician('Mick Jagger')          # default: is_band_member=True
-    # keithRichards = Musician('Keith Richards')
-    # charlieWatts = Musician('Charlie Watts')
-    # ronWood = Musician('Ron Wood')
-    # # Pink Floyd
-    # sydBarrett = Musician('Syd Barrett')
-    # rogerWaters = Musician('Roger Waters')
-    # davidGilmour = Musician('David Gilmour')
-    # nickMason = Musician('Nick Mason')
-    # rickWright = Musician('Rick Wright')
-    # # Solo musicians
-    # nickCave = Musician('Nick Cave', is_band_member=False)
-    # bobDylan = Musician('Bob Dylan', is_band_member=False)
-    # taylorSwift = Musician('Taylor Swift', is_band_member=False)
-    # elliottSmith = Musician('Elliott Smith', is_band_member=False)
-
-    # Print objects
-    print()
-
-    # Compare objects
-    print()
-
-    # Access data fields (instance variables), including 'private' fields
     print()
 
     # Add new data fields (instance variables)
@@ -205,6 +210,12 @@ if __name__ == "__main__":
     print()
 
     # Calling methods
+    print(johnLennon.play('I Saw Her Standing There', 'Thank you!',
+                          rhythm_count='One, two, three, four',
+                          end='Good night!'))
+    print(johnLennon.play_song('I Saw Her Standing There', 'Thank you!',
+                               rhythm_count='One, two, three, four',
+                               end='Good night!'))
     print()
 
     # # Demonstrate object data fields and methods for some built-in classes (boolean, int, object,...)
@@ -212,16 +223,21 @@ if __name__ == "__main__":
     # print(True.__int__())
     # print((1).__class__)
     # print((1).__class__.__name__)
-    # print(johnLennon.__dir__())
     # print((1).__dir__())
+    # print(object.__dict__)
+    # print()
+
+    # # Demonstrate object data fields and methods for Musician objects
+    # print(johnLennon.__dir__())
     # print(johnLennon.__dict__)
     # print(Musician.__dict__)
-    # print(object.__dict__)
-
-    # Demonstrate object data fields and methods in Python Console for Musician objects
-    print()
+    # print()
 
     # Demonstrate @classmethod (from_str())
+    j = str(johnLennon)
+    print(j)
+    print(johnLennon.from_str(j))
+    print(Musician.from_str(j))
     print()
 
     # Demonstrate inheritance
@@ -230,13 +246,36 @@ if __name__ == "__main__":
     #   object class defines object.__eq__(self, other) etc.
     #   object.__ne__(self, other), the inverse of object.__eq__(self, other),
     #   is provided by Python automatically once object.__eq__(self, other) is implemented
+    j = Singer(name='John Lennon', vocals=Vocals.LEAD_VOCALS, is_band_member=True)
+    print(j)
+    print()
+
+    print(type(j))
+    print(isinstance(j, Musician))          # True, since a Singer object is a kind of Musician object
+
+    print(j == Singer(name='John Lennon', vocals=Vocals.LEAD_VOCALS, is_band_member=True))
+    print(j == Singer(name='John Lennon', vocals=Vocals.LEAD_VOCALS, is_band_member=True))
+    print()
+
+    jl = Songwriter(name='John Lennon', instrument=Instrument.RHYTHM_GUITAR, is_band_member=True)
+    print(jl)
+    print(jl == Songwriter(name='John Lennon', instrument=Instrument.RHYTHM_GUITAR, is_band_member=False))
     print()
 
     # Demonstrate method overriding
+    j = Singer(name='John Lennon', vocals=Vocals.LEAD_VOCALS, is_band_member=True)
+    print(j.play('Stand By Me', rhythm_count='...three, four!', bye='Good Night!'))
     print()
 
     # Demonstrate multiple inheritance and MRO.
     # Make sure to read this first: https://stackoverflow.com/a/50465583/1899061 (especially Scenario 3).
+    lennon = SingerSongwriter(name='John Lennon',
+                              vocals=Vocals.LEAD_VOCALS,
+                              instrument=Instrument.RHYTHM_GUITAR,
+                              is_band_member=True)
+    print(lennon)
+    print()
+    print(SingerSongwriter.__mro__)
     print()
 
     # Demonstrate JSON encoding/decoding of Performer objects
