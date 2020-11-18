@@ -9,7 +9,7 @@ from music.musician import Musician
 from settings import PREFERRED_DATE_FORMAT
 
 
-class Band():
+class Band:
     """The class describing the concept of a music group/band.
     It includes a list of Musician objects (band members) and the date when the band started performing together.
     """
@@ -200,6 +200,7 @@ if __name__ == "__main__":
     i = iter(the_beatles)
     for _ in range(len(the_beatles.members)):
         print(next(i))
+    print()
 
     # Repeated attempt to run the iterator fails, because the iterator is exhausted
     # print(the_beatles.__next__())
@@ -214,11 +215,13 @@ if __name__ == "__main__":
     # # print(next(member_generator))
     # # print(next(member_generator))
     # # print(next(member_generator))
-    # while True:
-    #     try:
-    #         print(next(member_generator))
-    #     except StopIteration:
-    #         break
+    print(next_member(the_beatles))
+    member_generator = next_member(the_beatles)             # get the generator object from the generator function
+    while True:
+        try:
+            print(next(member_generator))
+        except StopIteration:
+            break
     print()
 
     # Demonstrate generator expressions

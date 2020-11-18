@@ -150,6 +150,7 @@ class Songwriter(Musician):
     def __init__(self, instrument, **kwargs):
         super().__init__(**kwargs)
         self.instrument = instrument if isinstance(instrument, Instrument) else None
+        self.writes_songs = True
 
     def __str__(self):
         return super().__str__() + '; ' + self.instrument.name.lower().replace('_', ' ')
@@ -229,9 +230,9 @@ if __name__ == "__main__":
 
     # # Demonstrate object data fields and methods for Musician objects
     # print(johnLennon.__dir__())
-    # print(johnLennon.__dict__)
+    print(johnLennon.__dict__)
     # print(Musician.__dict__)
-    # print()
+    print()
 
     # Demonstrate @classmethod (from_str())
     j = str(johnLennon)
