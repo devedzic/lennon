@@ -56,17 +56,22 @@ class BandStartDateError(StudioError):
 
 
 class StudioEncoder(json.JSONEncoder):
-    """JSON encoder for Studio objects.
+    """JSON encoder for Studio objects (cls= parameter in json.dumps()).
     """
 
-    def default(self, o):
+    def default(self, studio):
         # recommendation: always use double quotes with JSON
 
         pass
 
 
+def studio_py_to_json(studio):
+    """JSON encoder for Studio objects (default= parameter in json.dumps()).
+    """
+
+
 def studio_json_to_py(studio_json):
-    """JSON decoder for Studio objects (object_hook parameter in json.loads()).
+    """JSON decoder for Studio objects (object_hook= parameter in json.loads()).
     """
 
 

@@ -37,6 +37,9 @@ class Studio:
         bands = f'Bands: {", ".join([band.name for band in list(self.bands)])}'
         return f'{studio}\n{sessions}\n{bands}'
 
+    def __eq__(self, other):
+        return isinstance(other, Studio) and self.__dict__ == other.__dict__
+
 
 class StudioError(Exception):
     """Base class for exceptions in this module.
@@ -71,18 +74,41 @@ class BandStartDateError(StudioError):
 
 
 class StudioEncoder(json.JSONEncoder):
-    """JSON encoder for Studio objects.
+    """JSON encoder for Studio objects (cls= parameter in json.dumps()).
     """
 
-    def default(self, o):
+    def default(self, studio):
         # recommendation: always use double quotes with JSON
 
-        pass
+        return studio_py_to_json(studio)
+
+
+def studio_py_to_json(studio):
+    """JSON encoder for Studio objects (default= parameter in json.dumps()).
+    """
+
+    if isinstance(studio, Studio):
+        d = studio.__dict__.copy()
+        d['bands'] = json.dumps(studio.bands, default=band_py_to_json)
+        d['start_date'] = date_py_to_json(studio.start_date)
+        d['end_date'] = date_py_to_json(studio.end_date)
+        return {"__Studio__": d}
+    return {f"__{studio.__class__.__name__}__": studio.__dict__}
 
 
 def studio_json_to_py(studio_json):
-    """JSON decoder for Studio objects (object_hook parameter in json.loads()).
+    """JSON decoder for Studio objects (object_hook= parameter in json.loads()).
     """
+
+    if "__Studio__" in studio_json:
+        s = Studio('', '')
+        s.__dict__ = studio_json["__Studio__"]
+        s.bands = tuple(json.loads(s.bands, object_hook=band_json_to_py))
+        s.start_date = date_json_to_py(s.start_date)
+        s.end_date = date_json_to_py(s.end_date)
+        return s
+    return studio_json
+
 
 
 if __name__ == "__main__":
@@ -158,22 +184,22 @@ if __name__ == "__main__":
     #     f.writelines([str(beatle) + '\n' for beatle in the_beatles])
     # print()
 
-    # Demonstrate reading from a text file - <infile>.read(), <infile>.readline()
-    the_beatles = [johnLennon, paulMcCartney, georgeHarrison, ringoStarr]
-    file = get_data_dir() / 'the_beatles.txt'
-    the_beatles_members = []
-    with open(file, 'r') as f:
-        # s = f.read()
-        # print(s)
-        while True:
-            m = f.readline()
-            if m:
-                the_beatles_members.append(Musician.from_str(m))
-            else:
-                break
-        for beatle in the_beatles_members:
-            print(beatle)
-    print()
+    # # Demonstrate reading from a text file - <infile>.read(), <infile>.readline()
+    # the_beatles = [johnLennon, paulMcCartney, georgeHarrison, ringoStarr]
+    # file = get_data_dir() / 'the_beatles.txt'
+    # the_beatles_members = []
+    # with open(file, 'r') as f:
+    #     # s = f.read()
+    #     # print(s)
+    #     while True:
+    #         m = f.readline()
+    #         if m:
+    #             the_beatles_members.append(Musician.from_str(m))
+    #         else:
+    #             break
+    #     for beatle in the_beatles_members:
+    #         print(beatle)
+    # print()
 
     # # Demonstrate writing to a binary file - pickle.dump() and <f>.write()/<f>.writelines() with str.encode(<obj>)
     # the_beatles = [johnLennon, paulMcCartney, georgeHarrison, ringoStarr]
@@ -200,11 +226,36 @@ if __name__ == "__main__":
     # Demonstrate get_project_dir(), get_data_dir() and writing/reading to/from files in data dir
     print()
 
-    # Demonstrate JSON encoding/decoding of Studio objects
-    # Single object
-    print()
+    # # Demonstrate JSON encoding/decoding of Studio objects
+    # # Single object
+    # the_beatles = Band('The Beatles', *[johnLennon, paulMcCartney, georgeHarrison, ringoStarr],
+    #                    formed=date(1962, 8, 18), split=date(1970, 4, 10))
+    # pink_floyd = Band('Pink Floyd', rogerWaters, nickMason, rickWright, davidGilmour,
+    #                   formed=date(1965, 2, 12), split=date(1995, 3, 14))
+    # abbey_road = Studio('Abbey Road', 'London', *[the_beatles, pink_floyd],
+    #                     start_date=date(1967, 1, 1), end_date=date(1967, 12, 31), )
+    # abbey_road_json = json.dumps(abbey_road, default=studio_py_to_json, indent=4)
+    # print(abbey_road_json)
+    # abbey_road_py = json.loads(abbey_road_json, object_hook=studio_json_to_py)
+    # print()
+    # print(abbey_road)
+    # print(abbey_road_py)
+    # print()
 
     # List of objects
+    the_beatles = Band('The Beatles', *[johnLennon, paulMcCartney, georgeHarrison, ringoStarr],
+                       formed=date(1962, 8, 18), split=date(1970, 4, 10))
+    pink_floyd = Band('Pink Floyd', rogerWaters, nickMason, rickWright, davidGilmour,
+                      formed=date(1965, 2, 12), split=date(1995, 3, 14))
+    abbey_road_1 = Studio('Abbey Road', 'London', *[the_beatles, pink_floyd],
+                        start_date=date(1967, 1, 1), end_date=date(1967, 12, 31), )
+    abbey_road_2 = Studio('Abbey Road', 'London', *[the_beatles, pink_floyd],
+                        start_date=date(1967, 1, 1), end_date=date(1967, 12, 31), )
+    studios_json = json.dumps([abbey_road_1, abbey_road_2], default=studio_py_to_json, indent=4)
+    print(studios_json)
+    studios_py = json.loads(studios_json, object_hook=studio_json_to_py)
+    for studio in studios_py:
+        print(studio, '\n')
     print()
 
 

@@ -84,17 +84,22 @@ def next_member(band):
 
 
 class BandEncoder(json.JSONEncoder):
-    """JSON encoder for Band objects.
+    """JSON encoder for Band objects (cls= parameter in json.dumps()).
     """
 
-    def default(self, o):
+    def default(self, band):
         # recommendation: always use double quotes with JSON
 
         pass
 
 
-def band_json_to_py(members_json):
-    """JSON decoder for Band objects (object_hook parameter in json.loads()).
+def musician_py_to_json(band):
+    """JSON encoder for Band objects (default= parameter in json.dumps()).
+    """
+
+
+def band_json_to_py(band_json):
+    """JSON decoder for Band objects (object_hook= parameter in json.loads()).
     """
 
 

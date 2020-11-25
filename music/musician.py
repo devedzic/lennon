@@ -24,7 +24,7 @@ class Musician:
     def __init__(self, name, is_band_member=True):
         self.name = name
         self.is_band_member = is_band_member
-        self.__n = 'lll'                                    # 'private' field
+        # self.__n = 'lll'                                    # 'private' field
 
     # Properties: 'private' fields; run setters and getters in the debugger.
     # Make name a property (after setting up __init__(), __str__(), __eq__(), methods,...).
@@ -86,18 +86,48 @@ class Musician:
 
 
 class MusicianEncoder(json.JSONEncoder):
-    """JSON encoder for musician objects.
+    """JSON encoder for Musician objects (cls= parameter in json.dumps()).
     """
 
-    def default(self, o):
+    def default(self, musician):
         # recommendation: always use double quotes with JSON
 
-        pass
+        # if isinstance(musician, Musician):
+        #     return {"__Musician__": musician.__dict__}
+        # else:
+        #     return {f"__{musician.__class__.__name__}__": musician.__dict__}
+        return musician_py_to_json(musician)
+
+
+def musician_py_to_json(musician):
+    """JSON encoder for Musician objects (default= parameter in json.dumps()).
+    """
+
+    # recommendation: always use double quotes with JSON
+
+    if isinstance(musician, Musician):
+        return {"__Musician__": musician.__dict__}
+        # Alternatively:
+        # return {"__Musician__": vars(musician)}
+    else:
+        return {f"__{musician.__class__.__name__}__": musician.__dict__}
 
 
 def musician_json_to_py(musician_json):
-    """JSON decoder for Musician objects (object_hook parameter in json.loads()).
+    """JSON decoder for Musician objects (object_hook= parameter in json.loads()).
     """
+
+    # print(type(musician_json))            # prints <class 'dict'>
+
+    # It seems that json.loads internally converts musician_json string to dict!!!
+    # That's why, e.g., musician_json["__Musician__"] below reports no syntax error.
+    # If you try musician_json["__Musician__"] OUT of a call to json.loads, musician_json is a string and it's an error.
+
+    if "__Musician__" in musician_json:
+        m = Musician('')
+        m.__dict__.update(musician_json["__Musician__"])
+        return m
+    return musician_json
 
 
 class Singer(Musician):
@@ -279,9 +309,44 @@ if __name__ == "__main__":
     print(SingerSongwriter.__mro__)
     print()
 
-    # Demonstrate JSON encoding/decoding of Performer objects
-    # Single object
+    # Demonstrate JSON encoding/decoding of simple data types.
+    # Refer to https://docs.python.org/3.3/library/json.html#encoders-and-decoders for details.
     print()
 
-    # List of objects
+    # Demonstrate JSON encoding/decoding of Musician objects
+    # Single object
+    # print(json.dumps(johnLennon, default=lambda x: x.__dict__))
+    # # This does not work because the __eq__ does not work any more, probably because of @property for the name field:
+    # # print(johnLennon == json.loads(json.dumps(johnLennon, default=lambda x: x.__dict__)))
+    # # Try https://stackoverflow.com/a/32225623/1899061 or something like that for JSON-ing datetime.date objects
+    # # Alternatively, try https://stackoverflow.com/a/40489783/1899061 or https://stackoverflow.com/a/47034670/1899061
+    # # for the same thing
+    johnLennon_json = json.dumps(johnLennon, cls=MusicianEncoder)
+    print(johnLennon_json)
+    # print(type(johnLennon_json))
+    johnLennon_json = json.dumps(johnLennon, cls=MusicianEncoder, indent=4)
+    print(johnLennon_json)
+    # Using json.dumps(..., default=<py_to_json function>) instead of using MusicianEncoder
+    johnLennon_json = json.dumps(johnLennon, default=musician_py_to_json, indent=4)
+    print(johnLennon_json)
     print()
+
+    johnLennon_py = json.loads(johnLennon_json, object_hook=musician_json_to_py)
+    print(johnLennon_py)
+    # print()
+    #
+    # # List of objects
+    # johnLennon = Musician('John Lennon', is_band_member=True)
+    # paulMcCartney = Musician('Paul McCartney', is_band_member=True)
+    # georgeHarrison = Musician('George Harrison', is_band_member=True)
+    # ringoStarr = Musician('Ringo Starr', is_band_member=True)
+    # the_beatles = [johnLennon, paulMcCartney, georgeHarrison, ringoStarr]
+    #
+    # the_beatles_json = json.dumps(the_beatles, default=musician_py_to_json, indent=4)
+    # print(the_beatles_json)
+    # print()
+    # the_beatles_py = json.loads(the_beatles_json, object_hook=musician_json_to_py)
+    # print(the_beatles_py)
+    # print(the_beatles_py == the_beatles)
+    #
+    # print()

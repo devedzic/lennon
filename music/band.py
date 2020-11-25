@@ -5,8 +5,9 @@ It includes a list of Musician objects (band members) and the date when the band
 from datetime import date, datetime, time
 import json
 
-from music.musician import Musician
+from music.musician import Musician, musician_json_to_py, musician_py_to_json
 from settings import PREFERRED_DATE_FORMAT
+from util.utility import date_json_to_py, date_py_to_json
 
 
 class Band:
@@ -25,7 +26,7 @@ class Band:
     split_phrase_approx = 'the band split up in '
     split_phrase_date = 'the band split up on '
     split_phrase_negative = 'the band is still together.'
-    split_phrase_unknown = 'It is unknown if he band is still together.'
+    split_phrase_unknown = 'It is unknown if the band is still together.'
     expected_keywords = ['formed', 'split']
 
     def __init__(self, name, *members, formed=date.today(), split=date.today()):
@@ -138,18 +139,44 @@ def next_member(band):
 
 
 class BandEncoder(json.JSONEncoder):
-    """JSON encoder for Band objects.
+    """JSON encoder for Band objects (cls= parameter in json.dumps()).
     """
 
-    def default(self, o):
+    def default(self, band):
         # recommendation: always use double quotes with JSON
 
-        pass
+        return band_py_to_json(band)
 
 
-def band_json_to_py(members_json):
-    """JSON decoder for Band objects (object_hook parameter in json.loads()).
+def band_py_to_json(band):
+    """JSON encoder for Band objects (default= parameter in json.dumps()).
     """
+
+    if isinstance(band, Band):
+        d = band.__dict__.copy()
+        d['members'] = json.dumps(band.members, default=musician_py_to_json)
+        d['formed'] = date_py_to_json(band.formed)
+        d['split'] = date_py_to_json(band.split)
+        return {"__Band__": d}
+    return {f"__{band.__class__.__name__}__": band.__dict__}
+
+
+def band_json_to_py(band_json):
+    """JSON decoder for Band objects (object_hook= parameter in json.loads()).
+    """
+
+    if "__Band__" in band_json:
+        b = Band('')
+        b.__dict__ = band_json["__Band__"]
+        # b.__dict__['members'] = tuple(json.loads(b.__dict__['members'], object_hook=musician_json_to_py))
+        # b.__dict__['formed'] = date_json_to_py(b.__dict__['formed'])
+        # b.__dict__['split'] = date_json_to_py(b.__dict__['split'])
+        b.members = tuple(json.loads(b.members, object_hook=musician_json_to_py))   # compiler complains, but it works
+        b.formed = date_json_to_py(b.formed)
+        b.split = date_json_to_py(b.split)
+        b._Band__i = 0
+        return b
+    return band_json
 
 
 if __name__ == "__main__":
@@ -172,35 +199,35 @@ if __name__ == "__main__":
     #   object.__ne__(self, other), the inverse of object.__eq__(self, other),
     #   is provided by Python automatically once object.__eq__(self, other) is implemented
 
-    # Check the basic methods (__init__(), __str__(),...)
-    print()
-
-    # Check parse_band_str(<band_str>)
-    # print(the_beatles.parse_band_str(str(the_beatles)))
-    print(Band.parse_band_str(str(the_beatles)))
-    print()
-
-    # Check the alternative constructor 1 (@classmethod from_band_str_year(<band_str>))
-    beatles = Band.from_band_str_year(str(the_beatles))
-    print(beatles)
-    print()
-
-    # Check the alternative constructor 2 (@classmethod from_band_str_date(<band_str>))
-    beatles = Band.from_band_str_date(str(the_beatles))
-    print(beatles)
-    print()
-
-    # Check date validator (@staticmethod is_date_valid(<date>))
-    print()
-
-    # Check the iterator
-    # for _ in range(len(the_beatles.members)):
-    #     print(the_beatles.__next__())
+    # # Check the basic methods (__init__(), __str__(),...)
     # print()
-    i = iter(the_beatles)
-    for _ in range(len(the_beatles.members)):
-        print(next(i))
-    print()
+
+    # # Check parse_band_str(<band_str>)
+    # # print(the_beatles.parse_band_str(str(the_beatles)))
+    # print(Band.parse_band_str(str(the_beatles)))
+    # print()
+
+    # # Check the alternative constructor 1 (@classmethod from_band_str_year(<band_str>))
+    # beatles = Band.from_band_str_year(str(the_beatles))
+    # print(beatles)
+    # print()
+
+    # # Check the alternative constructor 2 (@classmethod from_band_str_date(<band_str>))
+    # beatles = Band.from_band_str_date(str(the_beatles))
+    # print(beatles)
+    # print()
+
+    # # Check date validator (@staticmethod is_date_valid(<date>))
+    # print()
+
+    # # Check the iterator
+    # # for _ in range(len(the_beatles.members)):
+    # #     print(the_beatles.__next__())
+    # # print()
+    # i = iter(the_beatles)
+    # for _ in range(len(the_beatles.members)):
+    #     print(next(i))
+    # print()
 
     # Repeated attempt to run the iterator fails, because the iterator is exhausted
     # print(the_beatles.__next__())
@@ -215,32 +242,45 @@ if __name__ == "__main__":
     # # print(next(member_generator))
     # # print(next(member_generator))
     # # print(next(member_generator))
-    print(next_member(the_beatles))
-    member_generator = next_member(the_beatles)             # get the generator object from the generator function
-    while True:
-        try:
-            print(next(member_generator))
-        except StopIteration:
-            break
-    print()
+    # print(next_member(the_beatles))
+    # member_generator = next_member(the_beatles)             # get the generator object from the generator function
+    # while True:
+    #     try:
+    #         print(next(member_generator))
+    #     except StopIteration:
+    #         break
+    # print()
 
-    # Demonstrate generator expressions
-    print(i**2 for i in range(4))
-    print(next(i**2 for i in range(4)))     # 0
-    print(next(i**2 for i in range(4)))     # 0 again, since the generator is initialized again
-    print()
-    e = (i**2 for i in range(4))
-    print(next(e))                          # 0
-    print(next(e))                          # 1
-    print(next(e))                          # 4
-    print(next(e))                          # 9
-    # print(next(e))                        # raises StopIteration
+    # # Demonstrate generator expressions
+    # print(i**2 for i in range(4))
+    # print(next(i**2 for i in range(4)))     # 0
+    # print(next(i**2 for i in range(4)))     # 0 again, since the generator is initialized again
+    # print()
+    # e = (i**2 for i in range(4))
+    # print(next(e))                          # 0
+    # print(next(e))                          # 1
+    # print(next(e))                          # 4
+    # print(next(e))                          # 9
+    # # print(next(e))                        # raises StopIteration
 
     # Demonstrate JSON encoding/decoding of Band objects
     # Single object
+    the_beatles = Band('The Beatles', *[johnLennon, paulMcCartney, georgeHarrison, ringoStarr],
+                       formed=date(1962, 8, 18), split=date(1970, 4, 10))
+    the_beatles_json = json.dumps(the_beatles, default=band_py_to_json, indent=4)
+    print(the_beatles_json)
+    print()
+    the_beatles_py = json.loads(the_beatles_json, object_hook=band_json_to_py)
+    print(the_beatles_py)
     print()
 
     # List of objects
+    the_beatles = Band('The Beatles', *[johnLennon, paulMcCartney, georgeHarrison, ringoStarr],
+                       formed=date(1962, 8, 18), split=date(1970, 4, 10))
+    pink_floyd = Band('Pink Floyd', rogerWaters, nickMason, rickWright, davidGilmour,
+                      formed=date(1965, 2, 12), split=date(1995, 3, 14))
+    bands_json = json.dumps([the_beatles, pink_floyd], default=band_py_to_json, indent=4)
+    print(bands_json)
     print()
 
 
