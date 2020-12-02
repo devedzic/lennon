@@ -1,10 +1,11 @@
-"""Web crawling and scraping
+"""Web crawling and scraping.
+BeautifulSoup documentation: https://www.crummy.com/software/BeautifulSoup/bs4/doc/
 """
 
 import requests
 from bs4 import BeautifulSoup
 
-from woodstock.util import utility
+from util import utility
 
 BASE_URL = 'https://www.imdb.com/'
 
@@ -15,9 +16,9 @@ def get_soup(url: str) -> BeautifulSoup:
     and then uses the text field of the Response object and the 'html.parser' to create the BeautifulSoup object.
     """
 
-    # Create Response object from HTTP GET request; assume that no redirection is allowed
+    # Create Response object from HTTP GET request; assume that no redirection is allowed (allow_redirects=False)
 
-    # Get text from the Response object
+    # Get text from the Response object, using <response>.text
 
     # Create and return the corresponding BeautifulSoup object from the response text; use 'html.parser'
 
@@ -62,28 +63,65 @@ def get_m_info(start_url: str, max_pages=1):
 
 if __name__ == "__main__":
 
-    # Test get_soup()
+    # Getting started
     start_url = 'https://www.imdb.com/search/keyword/?keywords=rock-%27n%27-roll%2Crock-music&ref_=kw_ref_key&' \
                 'mode=detail&page=1&sort=moviemeter,asc'
+
+    # Create Response object from GET request, using requests.get(<url>, allow_redirects=False)
     print()
 
-    # Write BeautifulSoup info to an HTML file (using write_text(str(<soup>), encoding='utf-8', errors='replace')
+    # Get response text from Response object, using <response>.text
     print()
 
-    # Demonstrate <soup>.find_all('<tag_name>') for 'h3' - attribute h3.text
+    # Get BeautifulSoup object from response text, using BeautifulSoup(<response text>, 'html.parser')
     print()
 
-    # Demonstrate <soup>.find_all('<tag_name>') for 'div' (filter ResultSet with <{'class': "<class name>"}), 'h3',...
+    # Save BeautifulSoup object to an HTML file,
+    # using <Path-file-object>.write_text(str(<BeautifulSoup object>), encoding='utf-8', errors='replace')
     print()
 
-    # Demonstrate attribute h3.find('<subtag>'), h3.find('<subtag>').text, h3.find('<subtag>').get('<attribute>')
+    # Demonstrate <BeautifulSoup object>.find('<tag>'), <BeautifulSoup object>.find_all(<tag>),
+    # <BeautifulSoup object>.find_all(<tag>, {'<tag_attr_name>': "<tag_attr_value>"});
+    # use, e.g., 'h3' or 'div' as the tags in the examples
     print()
 
-    # Demonstrate attribute h3.find('<subtag>'), filtered with <{'class': "<class name>"}
+    # Demonstrate getting a 'subtag' for a tag (a bs4.element.Tag object), e.g. h3.find('<subtag>')
+    print()
+
+    # Demonstrate getting an attribute value for a tag (a bs4.element.Tag object),
+    # e.g. h3.find('<subtag>'), filtered with <{'class': "<class name>"}>;
+    # alternatively: h3.find('<tag>')['<attr>'], h3.find('<subtag>').get('<attribute>'),
+    # h3.find('<subtag>').<attribute>,... (<attribute>: e.g. text)
     print()
 
     # Demonstrate shorthand notation (e.g., h3.find('<tag>').text is equivalent to h3.<tag>.text),
     # h3.<tag>.find_next_siblings() and h3.<tag>.string
+    print()
+
+    # Each bs4.element.ResultSet, bs4.element.Tag,... can be used to create another BeautifulSoup object,
+    # using BeautifulSoup(str(<bs4.element object>), 'html.parser')
+    print()
+
+    # Demonstrate shorthand notation (e.g., h3.find('<tag>').text is equivalent to h3.<tag>.text (or .string),
+    # h3.find('<tag>')['<attr>'] is equivalent to h3.<tag>.['<attr>'],...)
+    print()
+
+    # Get/Return all text from a bs4.element.Tag object, using <bs4.element.Tag object>.text
+    print()
+
+    # Demonstrate <tag>.find_next_siblings() (returns all <tag>'s siblings) and
+    # <tag>.find_next_sibling() (returns just the first one)
+    print()
+
+    # Get/Return and remove a specific item from a bs4.element.ResultSet using <result set>.pop(<index>) (default: last)
+    print()
+
+    # Example: get all movie titles from an IMDb page
+    print()
+
+    # # Test get_soup()
+    # start_url = 'https://www.imdb.com/search/keyword/?keywords=rock-%27n%27-roll%2Crock-music&ref_=kw_ref_key&' \
+    #             'mode=detail&page=1&sort=moviemeter,asc'
     print()
 
     # Test get_specific_page()

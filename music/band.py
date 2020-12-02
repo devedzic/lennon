@@ -159,6 +159,9 @@ def band_py_to_json(band):
         d['split'] = date_py_to_json(band.split)
         return {"__Band__": d}
     return {f"__{band.__class__.__name__}__": band.__dict__}
+    # Alternatively:
+    # else:
+    #   raise TypeError(f'object of type {musician.__class__.__name__}')
 
 
 def band_json_to_py(band_json):

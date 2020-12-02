@@ -94,6 +94,9 @@ def studio_py_to_json(studio):
         d['end_date'] = date_py_to_json(studio.end_date)
         return {"__Studio__": d}
     return {f"__{studio.__class__.__name__}__": studio.__dict__}
+    # Alternatively:
+    # else:
+    #   raise TypeError(f'object of type {musician.__class__.__name__}')
 
 
 def studio_json_to_py(studio_json):
@@ -102,13 +105,12 @@ def studio_json_to_py(studio_json):
 
     if "__Studio__" in studio_json:
         s = Studio('', '')
-        s.__dict__ = studio_json["__Studio__"]
+        s.__dict__.update(studio_json["__Studio__"])
         s.bands = tuple(json.loads(s.bands, object_hook=band_json_to_py))
         s.start_date = date_json_to_py(s.start_date)
         s.end_date = date_json_to_py(s.end_date)
         return s
     return studio_json
-
 
 
 if __name__ == "__main__":
@@ -226,37 +228,39 @@ if __name__ == "__main__":
     # Demonstrate get_project_dir(), get_data_dir() and writing/reading to/from files in data dir
     print()
 
-    # # Demonstrate JSON encoding/decoding of Studio objects
-    # # Single object
-    # the_beatles = Band('The Beatles', *[johnLennon, paulMcCartney, georgeHarrison, ringoStarr],
-    #                    formed=date(1962, 8, 18), split=date(1970, 4, 10))
-    # pink_floyd = Band('Pink Floyd', rogerWaters, nickMason, rickWright, davidGilmour,
-    #                   formed=date(1965, 2, 12), split=date(1995, 3, 14))
-    # abbey_road = Studio('Abbey Road', 'London', *[the_beatles, pink_floyd],
-    #                     start_date=date(1967, 1, 1), end_date=date(1967, 12, 31), )
-    # abbey_road_json = json.dumps(abbey_road, default=studio_py_to_json, indent=4)
-    # print(abbey_road_json)
-    # abbey_road_py = json.loads(abbey_road_json, object_hook=studio_json_to_py)
-    # print()
-    # print(abbey_road)
-    # print(abbey_road_py)
-    # print()
-
-    # List of objects
+    # Demonstrate JSON encoding/decoding of Studio objects
+    # Single object
     the_beatles = Band('The Beatles', *[johnLennon, paulMcCartney, georgeHarrison, ringoStarr],
                        formed=date(1962, 8, 18), split=date(1970, 4, 10))
     pink_floyd = Band('Pink Floyd', rogerWaters, nickMason, rickWright, davidGilmour,
                       formed=date(1965, 2, 12), split=date(1995, 3, 14))
-    abbey_road_1 = Studio('Abbey Road', 'London', *[the_beatles, pink_floyd],
+    abbey_road = Studio('Abbey Road', 'London', *[the_beatles, pink_floyd],
                         start_date=date(1967, 1, 1), end_date=date(1967, 12, 31), )
-    abbey_road_2 = Studio('Abbey Road', 'London', *[the_beatles, pink_floyd],
-                        start_date=date(1967, 1, 1), end_date=date(1967, 12, 31), )
-    studios_json = json.dumps([abbey_road_1, abbey_road_2], default=studio_py_to_json, indent=4)
-    print(studios_json)
-    studios_py = json.loads(studios_json, object_hook=studio_json_to_py)
-    for studio in studios_py:
-        print(studio, '\n')
+    abbey_road_json = json.dumps(abbey_road, default=studio_py_to_json, indent=4)
+    print(abbey_road_json)
+    abbey_road_py = json.loads(abbey_road_json, object_hook=studio_json_to_py)
     print()
+    print(abbey_road)
+    print(abbey_road_py)
+    print()
+
+    # # List of objects
+    # the_beatles = Band('The Beatles', *[johnLennon, paulMcCartney, georgeHarrison, ringoStarr],
+    #                    formed=date(1962, 8, 18), split=date(1970, 4, 10))
+    # pink_floyd = Band('Pink Floyd', rogerWaters, nickMason, rickWright, davidGilmour,
+    #                   formed=date(1965, 2, 12), split=date(1995, 3, 14))
+    # abbey_road_1 = Studio('Abbey Road', 'London', *[the_beatles, pink_floyd],
+    #                     start_date=date(1967, 1, 1), end_date=date(1967, 12, 31), )
+    # abbey_road_2 = Studio('Abbey Road', 'London', *[the_beatles, pink_floyd],
+    #                     start_date=date(1967, 1, 1), end_date=date(1967, 12, 31), )
+    # studios_json = json.dumps([abbey_road_1, abbey_road_2], default=studio_py_to_json, indent=4)
+    # print(studios_json)
+    # studios_py = json.loads(studios_json, object_hook=studio_json_to_py)
+    # for studio in studios_py:
+    #     print(studio, '\n')
+    # print()
+
+    # print(vars(the_beatles))
 
 
 

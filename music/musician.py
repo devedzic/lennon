@@ -111,6 +111,8 @@ def musician_py_to_json(musician):
         # return {"__Musician__": vars(musician)}
     else:
         return {f"__{musician.__class__.__name__}__": musician.__dict__}
+        # Alternatively:
+        # raise TypeError(f'object of type {musician.__class__.__name__}')
 
 
 def musician_json_to_py(musician_json):
