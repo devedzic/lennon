@@ -60,6 +60,22 @@ def crawl(url: str, max_pages=1):
         page += 1
 
 
+def get_4_digit_substring(a_string):
+    """Returns the first 4-digit substring from a_string.
+    It assumes that a_string contains a 4-digit substring representing a year.
+    Useful when the year of a movie release on IMDb is represented like '(1988, part 2)', or '(video, 2002)'."""
+
+    if len(a_string) >=4:
+        all_4_digit_substrings = [a_string[i:j]
+                                  for i in range(0, len(a_string) - 3)
+                                  for j in range(i + 1, len(a_string) + 1)
+                                  if len(a_string[i:j]) == 4]
+        first_4_digit_substring = next((x for x in all_4_digit_substrings if x.isdigit()), None)
+        return first_4_digit_substring
+    else:
+        return None
+
+
 def get_m_info(start_url: str, max_pages=1):
     """
     Returns structured information about movies from a multi-page IMDb movie list.
@@ -89,8 +105,11 @@ def get_m_info(start_url: str, max_pages=1):
 
     info_list = []
     for h3 in h3_list:
-        title = h3.a.text
-        year = h3.find('span', {'class': "lister-item-year text-muted unbold"}).text.split()[-1].lstrip('(').rstrip(')')
+        title = h3.a.text.strip()                               # some titles contain leading/trailing whitespace
+        # year = h3.find('span', {'class': "lister-item-year text-muted unbold"}).text.split()[-1].lstrip('(').rstrip(')')
+        year = h3.find('span', {'class': "lister-item-year text-muted unbold"}).text
+        year = get_4_digit_substring(year)
+        year = 'unknown' if not year else year      # covers the case when get_4_digit_substring(year) returns None
         link = BASE_URL + h3.a['href'].lstrip('/')
         info_list.append((title, year, link))
 
@@ -223,6 +242,16 @@ if __name__ == "__main__":
     # print(type(movie_items_h3[0].find_next_siblings()[0]))
     # print()
 
+    # # Example: get all movie titles from an IMDb page
+    # start_url = 'https://www.imdb.com/search/keyword/?keywords=rock-%27n%27-roll%2Crock-music&ref_=kw_ref_key&' \
+    #             'mode=detail&page=1&sort=moviemeter,asc'
+    # soup = BeautifulSoup(requests.get(start_url, allow_redirects=False).text, 'html.parser')
+    # h3_set = soup.find_all('h3')[:-1]
+    # titles = [h3.a.text for h3 in h3_set]
+    # print(titles)
+    # print(len(titles))
+    # print()
+
     # Test get_soup()
     start_url = 'https://www.imdb.com/search/keyword/?keywords=rock-%27n%27-roll%2Crock-music&ref_=kw_ref_key&' \
                 'mode=detail&page=1&sort=moviemeter,asc'
@@ -248,13 +277,52 @@ if __name__ == "__main__":
     # print()
     #
     # # Test crawl()
+    # next_soup = crawl(start_url, 3)
+    # while True:
+    #     try:
+    #         s = next(next_soup)
+    #         for h3 in s.find_all('h3')[:-1]:
+    #             print(h3.a.text)
+    #         print()
+    #         print()
+    #     except StopIteration:
+    #         break
     # print()
-    #
+
+    # # Test get_4_digit_substring()
+    # print(get_4_digit_substring('Lennon 1940-1980'))
+    # print(get_4_digit_substring('(1940)'))
+    # print(get_4_digit_substring('video (1940)'))
+    # print(get_4_digit_substring('1940, part I'))
+    # print(get_4_digit_substring('Well, 1940, part I'))
+    # print(get_4_digit_substring('Well, part I'))
+    # print()
+
     # Test get_m_info()
-    movies = get_m_info(start_url, max_pages=3)
+    movies = get_m_info(start_url, max_pages=5)
     for movie in movies:
         print(movie)
     print()
+
+    # # Test writing the output of get_m_info() to a csv file
+    # # A test list of movie info tuples, try with this list first; illustrates handling Unicode chars and whitespace
+    # movies = [('шђ', '2000', 'https://www.imdb.com/title/tt0238784/',
+    #            'https://m.media-amazon.com/images/M/MV5BNDk5NjI2NzMzMl5BMl5BanBnXkFtZTgwMjkyOTM0MjE@._V1_UY209_CR69,0,140,209_AL_.jpg'),
+    #           ('šđ', '1989', 'https://www.imdb.com/title/tt0096684/',
+    #            'https://m.media-amazon.com/images/M/MV5BMzA4MGEzZTMtNGQ3Ny00YjdiLWI2MTgtMzA4YmJlMDY5OGFkXkEyXkFqcGdeQXVyMDgyNjA5MA@@._V1_UY209_CR64,0,140,209_AL_.jpg'),
+    #           (' Rockpalast', '1974', 'https://www.imdb.com/title/tt0479780/',
+    #            'https://m.media-amazon.com/images/M/MV5BOWM2ZDAyOWUtYWQ0Ni00OTYyLWEwMjktZDJmNjdmNDZlYTdjXkEyXkFqcGdeQXVyMTQ0MzMwNQ@@._V1_UY209_CR1,0,140,209_AL_.jpg'),
+    #           (' Ten Days That Unexpectedly Changed America', '2006', 'https://www.imdb.com/title/tt0953255/',
+    #            'https://m.media-amazon.com/images/M/MV5BMjA2NDE3NDk1Nl5BMl5BanBnXkFtZTcwNjQ2NDMzMQ@@._V1_UY209_CR4,0,140,209_AL_.jpg')
+    #           ]
+    import csv
+    from util.utility import get_data_dir
+    csv_file = get_data_dir() / 'movies.csv'
+    header_row = ['Title', 'Year', 'Link', 'Poster']
+    with open(csv_file, 'w', newline='', encoding='utf-8') as f:    # newline: avoid blank rows; encoding: enable ш,š...
+        out = csv.writer(f)
+        out.writerow(header_row)
+        out.writerows(movies)
 
 
 

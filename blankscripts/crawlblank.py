@@ -44,6 +44,12 @@ def crawl(url: str, max_pages=1):
     """
 
 
+def get_4_digit_substring(a_string):
+    """Returns the first 4-digit substring from a_string.
+    It assumes that a_string contains a 4-digit substring representing a year.
+    Useful when the year of a movie release on IMDb is represented like '(1988, part 2)', or '(video, 2002)'."""
+
+
 def get_m_info(start_url: str, max_pages=1):
     """
     Returns structured information about movies from a multi-page IMDb movie list.
