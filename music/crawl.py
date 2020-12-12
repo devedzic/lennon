@@ -66,10 +66,11 @@ def get_4_digit_substring(a_string):
     Useful when the year of a movie release on IMDb is represented like '(1988, part 2)', or '(video, 2002)'."""
 
     if len(a_string) >=4:
-        all_4_digit_substrings = [a_string[i:j]
-                                  for i in range(0, len(a_string) - 3)
-                                  for j in range(i + 1, len(a_string) + 1)
-                                  if len(a_string[i:j]) == 4]
+        # all_4_digit_substrings = [a_string[i:j]
+        #                           for i in range(0, len(a_string) - 3)
+        #                           for j in range(i + 1, len(a_string) + 1)
+        #                           if len(a_string[i:j]) == 4]
+        all_4_digit_substrings = [a_string[i:(i+4)] for i in range(0, len(a_string) - 3)]
         first_4_digit_substring = next((x for x in all_4_digit_substrings if x.isdigit()), None)
         return first_4_digit_substring
     else:
